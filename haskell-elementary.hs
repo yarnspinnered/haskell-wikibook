@@ -1,3 +1,5 @@
+import Data.List
+
 -- Type the factorial function into a Haskell source file and load it into GHCi.
 factorial :: Integer -> Integer
 factorial 0 = 1
@@ -53,3 +55,138 @@ myLength lst = helper lst 0
     where 
         helper [] acc = acc
         helper (x:xs) acc = helper xs (acc + 1)
+
+-- takeInt returns the first n items in a list. So, takeInt 4 [11,21,31,41,51,61] returns [11,21,31,41].
+takeInt :: Int -> [Int] -> [Int]
+takeInt 0 _ = []
+takeInt n (x:xs) = x : takeInt (n - 1) xs
+
+-- dropInt drops the first n items in a list and returns the rest. So, dropInt 3 [11,21,31,41,51] returns [41,51].
+dropInt :: Int -> [Int] -> [Int]
+dropInt 0 lst = lst
+dropInt n (x:xs) = dropInt (n - 1) xs
+
+-- sumInt returns the sum of the items in a list.
+sumInt :: Num a => [a] -> a
+sumInt [] = 0
+sumInt (x:xs) = x + sumInt xs
+-- scanSum adds the items in a list and returns a list of the running totals. So, scanSum [2,3,4,5] returns [2,5,9,14].
+scanSum :: Num a => [a] -> [a]
+scanSum lst = helper lst 0 where 
+    helper [] _ = []
+    helper (x:xs) acc = (acc + x) : helper xs (acc + x)
+
+-- diffs returns a list of the differences between adjacent items. So, diffs [3,5,6,8] returns [2,1,2]. (Hints: one solution involves writing an auxiliary function which takes two lists and calculates the difference between corresponding elements. Alternatively, you might explore the fact that lists with at least two elements can be matched to a (x:y:ys) pattern.)
+diffs :: Num a => [a] -> [a]
+diffs [x] = []
+diffs [x1, x2] = [x1 - x2]
+diffs (x1:x2:xs) = (x1 - x2) : diffs  (x2:xs)
+
+-- Use map to build functions that, given a list xs of Ints, return:
+--     A list that is the element-wise negation of xs.
+negateList :: [Int] -> [Int]
+negateList = map ((*) (-1))
+
+--     A list of lists of Ints xss that, for each element of xs, contains the divisors of xs. You can use the following function to get the divisors:
+divisors p = [ f | f <- [1..p], p `mod` f == 0 ]
+allDivisors :: [Int] -> [[Int]]
+allDivisors = map divisors
+
+--     The element-wise negation of xss.
+negateListOfLists :: [[Int]] -> [[Int]]
+negateListOfLists = map negateList
+
+-- Implement a Run Length Encoding (RLE) encoder and decoder.
+--     The idea of RLE is simple; given some input:
+
+--     "aaaabbaaa"
+
+--     compress it by taking the length of each run of characters:(4,'a'), (2, 'b'), (3, 'a')
+--     The concat and group functions might be helpful. In order to use group, import the Data.List module by typing :m Data.List at the ghci prompt or by adding import Data.List to your Haskell source code file.
+--     What is the type of your encode and decode functions?
+myEncode :: String -> [(Int, Char)]
+myEncode x = zip (map length $ group x) (map head $ group x) 
+
+myDecode :: [(Int, Char)] -> String
+myDecode = concat . map (uncurry replicate)
+
+-- With respect to your solutions to the first set of exercises in this chapter, is there any difference between scanSum (takeInt 10 [1..]) and takeInt 10 (scanSum [1..])?
+-- ScanSum TakeInt gives running total of 1 to 10. TakeInt ScanSum never terminates... if it wasnt lazy. Its lazy so no dfiference.
+
+-- Write functions that, when applied to lists, give the last element of the list and the list with the last element dropped (without using reverse).
+-- This functionality is provided by Prelude through the last and init functions. Like head and tail, they blow up when given empty lists.
+myLast :: [a] -> a
+myLast [x] = x
+myLast (x:xs) = myLast xs
+
+-- Define the following functions recursively (like the definitions for sum, product and concat above), then turn them into a fold:
+--     and :: [Bool] -> Bool, which returns True if a list of Bools are all True, and False otherwise.
+--     or :: [Bool] -> Bool, which returns True if any of a list of Bools are True, and False otherwise.
+myAnd :: [Bool] -> Bool
+myAnd [x] = x
+myAnd (False:xs) = False
+myAnd (True:xs) = myAnd xs
+
+myFoldedAnd :: [Bool] -> Bool
+myFoldedAnd = foldr (&&) True
+
+myOr :: [Bool] -> Bool
+myOr [] = False
+myOr (True:xs) = True
+myOr (False:xs) = myOr xs
+
+myFoldedOr :: [Bool] -> Bool
+myFoldedOr = foldr (||) False
+-- Define the following functions using foldl1 or foldr1:
+--     maximum :: Ord a => [a] -> a, which returns the maximum element of a list (hint: max :: Ord a => a -> a -> a returns the maximum of two values).
+--     minimum :: Ord a => [a] -> a, which returns the minimum element of a list (hint: min :: Ord a => a -> a -> a returns the minimum of two values).
+myMaximum :: Ord a => [a] -> a
+myMaximum = foldl1 max
+
+-- Use a fold (which one?) to define reverse :: [a] -> [a], which returns a list with the elements in reverse order.
+myReverse :: [a] -> [a]
+myReverse = foldl (\x y -> y:x) []
+
+-- Write your own definition of scanr, first using recursion, and then using foldr. Do the same for scanl first using recursion then foldl.
+myRecursiveScanl :: (a -> b -> a) -> a -> [b] -> [a]
+myRecursiveScanl f starting lst = helper f lst [] where
+    helper f [] res = res
+    helper f (x:xs) [] = helper f xs [(f starting x)] 
+    helper f (x:xs) res = helper f xs ((f (head res) x):res )
+
+myFoldScanl :: (a -> b -> a) -> a -> [b] -> [a]
+myFoldScanl f firstVal lst = reverse $ foldl (\acc x -> (f (head acc) x):acc) [firstVal] lst
+
+myRecursiveScanr :: (a -> b -> b) -> b -> [a] -> [b]
+myRecursiveScanr f acc [] = [acc]
+myRecursiveScanr f acc (x:xs) = (f x (head temp)) : temp where
+    temp = myRecursiveScanr f acc xs
+
+myFoldScanr :: (a -> b -> b) -> b -> [a] -> [b]
+myFoldScanr f firstVal lst = foldr (\x acc -> (f x $ head acc) : acc ) [firstVal] lst
+
+factList :: Integer -> [Integer]
+factList n = scanl1 (\acc x -> x * acc) [1..n]
+
+-- Write a returnDivisible :: Int -> [Int] -> [Int] function which filters a list of integers retaining only the numbers divisible by the integer passed as first argument. For integers x and n, x is divisible by n if (mod x n) == 0 (note that the test for evenness is a specific case of that).
+returnDivisible :: Int -> [Int] -> [Int]
+returnDivisible m lst = [x | x <- lst, mod x m == 0]
+
+-- Write a function choosingTails :: [[Int]] -> [[Int]] using list comprehension syntax with appropriate guards (filters) for empty lists returning a list of tails following a head bigger than 5:
+
+-- choosingTails  [[7,6,3],[],[6,4,2],[9,4,3],[5,5,5]]
+-- -- [[6,3],[4,2],[4,3]]
+choosingTails :: [[Int]] -> [[Int]]
+choosingTails lst = [xs | (x:xs) <- lst, x > 5]
+
+-- Does the order of guards matter? You may find it out by playing with the function of the preceding exercise.
+-- Over this section we've seen how list comprehensions are essentially syntactic sugar for filter and map. Now work in the opposite direction and define alternative versions of the filter and map using the list comprehension syntax.
+myFilter :: (a -> Bool) -> [a] -> [a]
+myFilter p lst = [x | x <- lst, p x]
+
+myMap :: (a -> b) -> [a] -> [b]
+myMap f lst = [f x| x<-lst]
+
+-- Rewrite doubleOfFirstForEvenSeconds using filter and map instead of list comprehension.
+doubleOfFirstForEvenSeconds :: [(Int, Int)] -> [Int]
+doubleOfFirstForEvenSeconds ps =  map ((2*).fst) $ filter ((0==).(`mod` 2).snd) ps
