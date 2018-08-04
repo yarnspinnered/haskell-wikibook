@@ -1,0 +1,81 @@
+-- Define a module. 
+-- Each file belongs to one module at most
+-- Module names start with capital
+-- This file is called Path/To/MyModule.hs
+module Path.To.MyModule where
+
+-- Importing stuff
+-- If importing non-library source files, the compiler searches for the pathname within the directory of the entry point
+-- e.g. if src folder contains main.hs and folderA/util.hs. Then import folderA.util will look for folderA inside the src folder before going to util.hs
+
+import Data.Char (toLower, toUpper) -- import only the functions toLower and toUpper from Data.Char
+import Data.Tree (Tree(Node)) -- import only the Tree data type and its Node constructor from Data.Tree
+import Data.List -- import everything exported from Data.List
+
+
+-- Handling import conflicts
+
+-- Qualified imports when you have two modules with same function name
+import qualified MyModule
+import qualified MyOtherModule
+myModule.foo -- Ok!
+myOtherModule.foo -- Ok!
+foo -- not okay!
+
+-- Hiding definitions. Because its inconvenient to qualify functions all the time!
+import MyModule hiding (foo)
+import MyOtherModule
+foo -- Always refers to MyOtherModule.foo now
+
+-- Renaming module. Because long names bad. 
+import MyVeryLongBlahBlahBlahModule as Shorty
+
+-- Combining limited imports with qualified for rest
+import qualified Data.Set as Set
+import Data.Set (Set, empty, insert)
+
+-- What is exported from a file?
+-- Only foo and bar get exported! Export decisions are made at the top of the file.
+-- Function exports
+module MyModule (foo, bar) where
+foo = ...
+bar = ...
+baz = ...
+
+-- Datatype exports
+MyModule2 (Tree(..))
+
+-- Compiling an executable
+Must have a Main modul with an entry point named main
+-- A single file version (For the entry point, filename doesnt need to be same as module name)
+-- The reasoning for this is that keeping filenames same as modules helps to locate modules. 
+-- But the entry point is already specified when compiling the file so its all good
+ghc --make -o compiledFile sourcefile.hs 
+
+-- Multiple file compilation
+-- Assume the terminal is currently in the directory that contains src.
+-- make tells ghc to resolve all dependencies and compile them as well
+-- If there are multiple folders to look inside, use -i to indicate.
+-- -i<FolderA>:<FolderB> for eg
+ghc --make -isrc -o sillyprog Main.hs
+
+-- Indentation rules
+Stuff thats part of an expression should be indented deeper than the beginning of that expression.
+Grouped expressions must be aligned exactly on the left.
+-- Correct
+do first thing
+   second thing
+   third thing
+-- wrong
+do first thing
+second thing
+third thing
+
+-- Special note on if
+-- then and else are part of the if expression 
+
+-- do first thing
+--    if condition
+--      then foo
+--      else bar
+--    third thing

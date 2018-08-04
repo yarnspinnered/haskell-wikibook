@@ -1,3 +1,5 @@
+module Main where
+
 import Data.List
 
 -- Type the factorial function into a Haskell source file and load it into GHCi.
@@ -190,3 +192,6 @@ myMap f lst = [f x| x<-lst]
 -- Rewrite doubleOfFirstForEvenSeconds using filter and map instead of list comprehension.
 doubleOfFirstForEvenSeconds :: [(Int, Int)] -> [Int]
 doubleOfFirstForEvenSeconds ps =  map ((2*).fst) $ filter ((0==).(`mod` 2).snd) ps
+
+
+main = putStrLn "Hello World"
