@@ -143,3 +143,41 @@ form2 = concat [[(x,y) | y <- [3,4]] | x <- [1,2]]
 positions2 k list = find k $ zip list [1..]
 
 scalarproduct xs ys = sum [x * y | (x,y) <- zip xs ys]
+
+factorial :: Int -> Int
+factorial n
+    | n < 0 = error "Negative factorials not allowed"
+    | n == 0 = 1
+    | otherwise = n * factorial (n - 1)
+
+sumdown :: Int -> Int
+sumdown 1 = 1
+sumdown n = n + sumdown (n - 1)
+
+myExp :: Int -> Int -> Int
+myExp a 1 = a
+myExp a n =  (myExp (square a) (n `div` 2 ))* (if (odd n) then a else 1)
+    where square x = x * x
+
+euclids :: Int -> Int -> Int
+euclids x y
+    | x > y = euclids y x
+    | x == y = x
+    | x <= 1 = x
+    | even x && even y = 2 * euclids (x `div` 2) (y `div` 2)
+    | otherwise = euclids x (y - x)
+
+myAndList :: [Bool] -> Bool
+myAndList [] = True
+myAndList (x:xs) = x && myAndList xs
+
+merge :: Ord a => [a] -> [a] -> [a]
+merge listA [] = listA
+merge [] listB = listB
+merge (x:xs) (y:ys) = if (x <= y) then x : merge xs (y:ys) else y : merge (x:xs) ys
+
+mergesort :: Ord a => [a] -> [a]
+mergesort [] = []
+mergesort [x] = [x]
+mergesort list = merge (mergesort $ take len  list) (mergesort $ drop len list)
+    where len = length list `div` 2
