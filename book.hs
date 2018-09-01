@@ -181,3 +181,12 @@ mergesort [] = []
 mergesort [x] = [x]
 mergesort list = merge (mergesort $ take len  list) (mergesort $ drop len list)
     where len = length list `div` 2
+
+insert :: Ord a => [a] -> a -> [a]
+insert [] x = [x]
+insert (y:ys) x | (x <= y) = x : y :ys
+                | otherwise = y : insert ys x
+
+insertionSort :: Ord a => [a] -> [a]
+insertionSort [] = []
+insertionSort (x:xs) = insert (insertionSort xs) x
