@@ -190,3 +190,9 @@ insert (y:ys) x | (x <= y) = x : y :ys
 insertionSort :: Ord a => [a] -> [a]
 insertionSort [] = []
 insertionSort (x:xs) = insert (insertionSort xs) x
+
+
+type Bit = Int
+
+bin2int :: [Bit] -> Int
+bin2int = foldl (\acc x -> x + 2*acc) 0
